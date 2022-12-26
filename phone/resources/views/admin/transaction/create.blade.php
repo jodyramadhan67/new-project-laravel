@@ -50,7 +50,7 @@
                               </div>
                           </div>
 
-<!-- Book -->
+<!-- Watch -->
                           <div class="form-group">
                               <label>Watch</label>
                               <select name="watches[]" class="select2 form-control" multiple="multiple" width="50px">
@@ -63,7 +63,7 @@
                           <div class="form-group" hidden>
                               <div class="form-check">
                                   <input type="number" name="status" value="2">
-                                  <label class="form-check-label">Belum dikembalikan</label>
+                                  <label class="form-check-label">Belum dibeli</label>
                               </div>
                           </div>
             

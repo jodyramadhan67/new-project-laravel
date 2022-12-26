@@ -56,46 +56,42 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('total_member', 'total_watch', 'total_transaction', 'total_laptop', 'data_donut', 'label_donut', 'dataBar', 'labelPie', 'dataPie'));
      }
 
-    // public function catalog()
-    // {
-    //     $catalogs = Catalog::with('books')->get();
+    public function phone()
+    {
+        $phones = Phone::with('watches')->get();
 
-    //     return view('admin.catalog.index', compact('catalogs')); // and also can use ['catalogs' => $catalogs]
-    // }
+        return view('admin.phone.index', compact('phones')); // and also can use ['catalogs' => $catalogs]
+    }
 
-    // public function member()
-    // {
-    //     return view('admin.member');
-    // }
+    public function member()
+    {
+        return view('admin.member');
+    }
 
-    // public function publisher()
-    // {
-    //     return view('admin.publisher');
-    // }
+    public function tablet()
+    {
+        return view('admin.tablet');
+    }
 
-    // public function author()
-    // {
-    //     $authors = Author::all();
-    //     return view('admin.author', compact('authors'));
-    // }
+    public function laptop()
+    {
+        $laptops = Laptop::all();
+        return view('admin.laptop', compact('laptops'));
+    }
 
-    // public function book()
-    // {
-    //     $publishers = Publisher::all();
-    //     $authors = Author::all();
-    //     $catalogs = Catalog::all();
+    public function watch()
+    {
+        $phones = Phone::all();
+        $tablets = Tablet::all();
+        $laptops = Laptop::all();
 
-    //     return view('admin.book', compact('publishers', 'authors', 'catalogs'));
-    // }
+        return view('admin.watch', compact('phones', 'tablets', 'laptops'));
+    }
 
-    // public function transaction()
-    // {
-    //     // if (auth()->user()->role('petugas')) {
-    //     //     $transactions = Transaction::with('members')->get();
-    //     //     return view('admin.transaction.index', compact('transactions'));
-    //     // } else {
-    //     //     return abort(403);
-    //     // }
-    // }
+    public function transaction()
+    {
+        $transactions = Transaction::with('members')->get();
+        return view('admin.transaction.index', compact('transactions'));
+    }
 
 }

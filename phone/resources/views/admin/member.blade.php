@@ -17,6 +17,7 @@
                         <a href="#" @click="addData()" data-target="#modal-default" data-toggle="modal" class="btn btn-sm btn-primary pull-right">Add New Member</a>
                         </a>
                     </div>
+
                     <!-- /.card-header -->
                     <div class="card-body p-0">
                         <table id="datatable" class="table table-striped table-bordered">
@@ -55,13 +56,17 @@
                         <input type="hidden" name="_method" value="PUT" v-if="editStatus">
 
                         <div class="form-group">
-                                <label>Name</label>
-                                <input type="text" name="name" class="form-control" require="" :value="data.name">
-                        </div>
-                        <div class="form-group">
-                                <label>Gender</label>
-                                <input type="text" name="gender" class="form-control" require="" :value="data.gender">
-                        </div>
+				        		<label>Name</label>
+				        		<input type="text" name="name" class="form-control @error('name') is-invalid @enderror" placeholder="Enter name" :value="data.name">
+				        		@error('name')
+	            					<div class="alert alert-danger">{{$message}}</div>
+		            			@enderror
+					        </div>
+					        <div class="form-group">
+					        	<label>Gender :</label>
+				        		<input name="gender" type="radio" value="l" /> Laki - laki
+							    <input name="gender" type="radio" value="p" /> Peempuan
+					        </div>
                         <div class="form-group">
                                 <label>Phone_number</label>
                                 <input type="text" name="phone_number" class="form-control" require="" :value="data.phone_number">
@@ -85,6 +90,15 @@
             </div>
             <!-- /.modal-dialog -->
         </div>
+        <div class="col-md-2">
+                                <select class="form-control" name="gender">
+                                    <option value="0">Semua Jenis Kelamin</option>
+                                    <option value="P">Perempuan</option>
+                                    <option value="L">Laki - Laki</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
         <!-- /.modal -->
     </div>
     <!-- /.card -->
@@ -125,6 +139,15 @@
               </a>`;
         }, orderable: false, width: '200px', class: 'text-center'},
     ];
+</script>
+<script type="text/javascript">
+    function validate(form) {
+        var gender = form.querySelectorAll('input[name="gender"]:checked');
+        if (!gender.length) {
+            alert('You must select male or female');
+            return false;
+        }
+    }
 </script>
 <script src="{{ asset('js/data.js') }}"></script>
 

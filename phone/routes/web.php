@@ -27,13 +27,15 @@ Route::resource('/tablets', App\Http\Controllers\TabletController::class);
 Route::resource('/laptops', App\Http\Controllers\LaptopController::class);
 Route::resource('/members', App\Http\Controllers\MemberController::class);
 Route::resource('/watches', App\Http\Controllers\WatchController::class);
-Route::resource('/transactions', App\Http\Controllers\WatchController::class);
+Route::resource('/transactions', App\Http\Controllers\TransactionController::class);
 
 //api
 Route::get('/api/tablets', [App\Http\Controllers\TabletController::class, 'api']);
 Route::get('/api/laptops', [App\Http\Controllers\laptopController::class, 'api']);
 Route::get('/api/members', [App\Http\Controllers\memberController::class, 'api']);
 Route::get('/api/watches', [App\Http\Controllers\watchController::class, 'api']);
+Route::get('/api/transactions', [App\Http\Controllers\transactionController::class, 'api']);
 
 // Route Admin
 Route::get('Graphics', [App\Http\Controllers\AdminController::class, 'dashboard']);
+// Route::get('Transactions', [App\Http\Controllers\AdminController::class, 'transaction']);
