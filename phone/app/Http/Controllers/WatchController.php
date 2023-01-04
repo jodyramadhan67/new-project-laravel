@@ -1,14 +1,20 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\DB;
 use App\Models\Phone;
 use App\Models\Tablet;
 use App\Models\Laptop;
 use App\Models\Watch;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 
 class WatchController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,13 +25,16 @@ class WatchController extends Controller
         $phones = Phone::all();
         $tablets = Tablet::all();
         $laptops = Laptop::all();
-        return view('admin.watch', compact('phones','tablets','laptops') );
+        return view('admin.watch', compact('phones','tablets','laptops'));
     }
 
     public function api()
     {
         $watches = Watch::all();
-       
+        foreach ($watches as $watch) {
+            $watch->date = convert_date($watch->created_at);
+        }
+
         return json_encode($watches);
     }
 
@@ -47,20 +56,45 @@ class WatchController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request,[
-            'series'  => ['required','max:65'],
-            'type'  => ['required','string'],
-            'year'  => ['required'],
-            'phones_id'=>['required'],
-            'tablet_id'=>['required'],
-            'laptop_id'=>['required'],
-            'qty'  => ['required'],
-            'price'  => ['required'],
-        ]);
-        
-        Watch::create($request->all());
+        // $this->validate($request, [
+        //     'series' => ['required', Rule::unique('watches', 'series'), 'max:11'],
+        //     'type' => ['required', 'max:64'],
+        //     'year' => ['required', 'max:4'],
+        //     'phone_id' => ['required'],
+        //     'tablet_id' => ['required'],
+        //     'laptop_id' => ['required'],
+        //     'qty' => ['required', 'max:11'],
+        //     'price' => ['required', 'max:11']
+
+        // ]);
+
+        $watch = new Watch;
+        $watch->series = $request->series;
+        $watch->type = $request->type;
+        $watch->year = $request->year;
+        $watch->phone_id = $request->phone_id;
+        $watch->tablet_id = $request->tablet_id;
+        $watch->laptop_id = $request->laptop_id;
+        $watch->qty = $request->qty;
+        $watch->price = $request->price;
+        $watch->save();
 
         return redirect('watches');
+
+        // $this->validate($request,[
+        //     'series'  => ['required'],
+        //     'type'  => ['required'],
+        //     'year'  => ['required'],
+        //     'phones_id'=>['required'],
+        //     'tablet_id'=>['required'],
+        //     'laptop_id'=>['required'],
+        //     'qty'  => ['required'],
+        //     'price'  => ['required'],
+        // ]);
+        
+        // Watch::create($request->all());
+
+        // return redirect('watches');
     }
 
     /**
@@ -94,20 +128,45 @@ class WatchController extends Controller
      */
     public function update(Request $request, Watch $watch)
     {
-        $this->validate($request,[
-            'series'  => ['required','max:65'],
-            'type'  => ['required','string'],
-            'year'  => ['required'],
-            'phones_id'=>['required'],
-            'tablet_id'=>['required'],
-            'laptop_id'=>['required'],
-            'qty'  => ['required'],
-            'price'  => ['required'],
-        ]);
-        
-        $watch-> update($request->all());
+        // $this->validate($request, [
+        //     'series' => ['required', Rule::unique('watches', 'series')->ignore($watch->id, 'id'), 'max:11'],
+        //     'type' => ['required', 'max:64'],
+        //     'year' => ['required', 'max:4'],
+        //     'phone_id' => ['required'],
+        //     'tablet_id' => ['required'],
+        //     'laptop_id' => ['required'],
+        //     'qty' => ['required', 'max:11'],
+        //     'price' => ['required', 'max:11']
+
+        // ]);
+
+        $watch = Watch::find($watch->id);
+        $watch->series = $request->series;
+        $watch->type = $request->type;
+        $watch->year = $request->year;
+        $watch->phone_id = $request->phone_id;
+        $watch->tablet_id = $request->tablet_id;
+        $watch->laptop_id = $request->laptop_id;
+        $watch->qty = $request->qty;
+        $watch->price = $request->price;
+        $watch->save();
 
         return redirect('watches');
+
+        // $this->validate($request,[
+        //     'series'  => ['required'],
+        //     'type'  => ['required'],
+        //     'year'  => ['required'],
+        //     'phones_id'=>['required'],
+        //     'tablet_id'=>['required'],
+        //     'laptop_id'=>['required'],
+        //     'qty'  => ['required'],
+        //     'price'  => ['required'],
+        // ]);
+        
+        // $watch->update($request->all());
+
+        // return redirect('watches');
     }
 
     /**

@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="{{ asset('assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
 @endsection
 
-@can('index peminjaman')
 @section('content')
 <div id="controller">
     <div class="row">
@@ -22,8 +21,8 @@
                         <div class="col-md-2">
                             <select class="form-control" name="status">
                                 <option value="0">Status</option>
-                                <option value="1">Sudah Kembali</option>
-                                <option value="2">Belum Kembali</option>  
+                                <option value="1">Sudah Dibeli</option>
+                                <option value="2">Belum Dibeli</option>  
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -39,7 +38,7 @@
                                 <th class="text-center">Date Start</th>
                                 <th class="text-center">Date End</th>
                                 <th class="text-center">Name</th>
-                                <th class="text-center">Lama Pinjam</th>
+                                <th class="text-center">Stok</th>
                                 <th class="text-center">Watch Total</th>
                                 <th class="text-center">Price</th>
                                 <th class="text-center">Status</th>                                 
@@ -55,7 +54,6 @@
         
 </div>
 @endsection
-@endcan
 
 @section('js')
 <!-- DataTables  & Plugins -->
@@ -79,11 +77,11 @@
                 {data: 'date_start', class: 'text-center', orderable: true},
                 {data: 'date_end', class: 'text-center', orderable: true},
                 {data: 'members.name', class: 'text-center', orderable: true},
-                {data: 'lama_pinjam', class: 'text-center', orderable: true},
+                {data: 'stok', class: 'text-center', orderable: true},
                 {data: 'watch_total', class: 'text-center', orderable: true},
                 {data: 'total_bayar', class: 'text-center', orderable: true},
                 {render: function (index, row, data, meta) {
-                        return data.status == 2 ? 'Belum Dikembalikan' : 'Sudah Dikembalikan'
+                        return data.status == 2 ? 'Belum Dibeli' : 'Sudah Dibeli'
                 }, class: 'text-center', orderable: false },
                 {data: 'action', class: 'text-center', orderable: false},
         ];

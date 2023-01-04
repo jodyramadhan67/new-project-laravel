@@ -41,7 +41,7 @@
 
 <!-- Date -->
                           <div class="form-group">
-                              <label>Waktu Pinjam</label>
+                              <label>Waktu Beli</label>
                               <div>
                                   <label>Date Start</label>
                                   <input type="date" class="form-control" name="date_start">
@@ -55,7 +55,7 @@
                               <label>Watch</label>
                               <select name="watches[]" class="select2 form-control" multiple="multiple" width="50px">
                                   @foreach($watches as $watch)
-                                  <option :selected="watch.id == {{ $watch->id }}" value="{{ $watch->id }}">{{ $watch->title }}</option>
+                                  <option :selected="watch.id == {{ $watch->id }}" value="{{ $watch->id }}">{{ $watch->type }}</option>
                                   @endforeach
                               </select>
                           </div>

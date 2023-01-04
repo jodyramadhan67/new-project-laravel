@@ -28,7 +28,7 @@
                       <td>
                           @foreach($transaction->watches as $watch)
                               <li>
-                                {{ $watch->title }}
+                                {{ $watch->type }}
                               </li>
                           @endforeach
                       </td>
@@ -36,7 +36,7 @@
                   <div class="grid-form">
                       <label>Status:</label>
                       <div class="col-sm-12">
-                        <input disabled class="form-control-plaintext" value="{{ $transaction->status ? 'Belum Dikembalikan' : 'Sudah Dikembalikan' }}">
+                        <input disabled class="form-control-plaintext" value="{{ $transaction->status ? 'Belum Dibeli' : 'Sudah Dibeli' }}">
                       </div>
                   </div>
               </div>

@@ -44,7 +44,7 @@
 
 <!-- Date -->
                           <div class="form-group">
-                              <label>Waktu Pinjam</label>
+                              <label>Waktu Beli</label>
                               <div>
                                   <label>Date Start</label>
                                   <input type="date" class="form-control" name="date_start" value="{{ $transaction->date_start }}">
@@ -53,12 +53,12 @@
                               </div>
                           </div>
 
-<!-- Book -->
+<!-- Watch -->
                           <div class="form-group">
                               <label>Watch</label>
                               <select name="watches[]" class="select2 form-control" multiple="multiple" width="50px">
                                   @foreach($watches as $watch)
-                                  <option value="{{ $watch->id }}" {{ $transaction->watches()->find($watch->id) ? 'selected' : ''}}>{{ $watch->title }}</option>
+                                  <option value="{{ $watch->id }}" {{ $transaction->watches()->find($watch->id) ? 'selected' : ''}}>{{ $watch->type }}</option>
                                   @endforeach
                               </select>
                           </div>
@@ -67,11 +67,11 @@
                               <label>Status</label>
                               <div class="form-check">
                                   <input class="form-check-input" type="radio" name="status" value="1" {{ $transaction->status == 1 ? 'checked' : '' }}>
-                                  <label class="form-check-label">Sudah dikembalikan</label>
+                                  <label class="form-check-label">Sudah dibeli</label>
                               </div>
                               <div class="form-check">
                                   <input class="form-check-input" type="radio" name="status" value="0" {{ $transaction->status == 2 ? 'checked' : '' }}>
-                                  <label class="form-check-label">Belum dikembalikan</label>
+                                  <label class="form-check-label">Belum dibeli</label>
                               </div>
                           </div>
             

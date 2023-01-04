@@ -9,5 +9,15 @@ class TransactionDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'transaction_details';
+    protected $fillable = ['id', 'transaction_id', 'watch_id', 'qty'];
+
+    public function transaction()
+    {
+        return $this->belongsTo('App\Models\Transaction','transaction_id');
+    }
+
+    public function watch()
+    {
+        return $this->belongsTo('App\Models\Watch','watch_id');
+    }
 }

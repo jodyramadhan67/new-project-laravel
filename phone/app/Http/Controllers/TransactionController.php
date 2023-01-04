@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Watch;
 use App\Models\Member;
-use DB;
+use Illuminate\Support\Facades\DB; //import use DB
 use App\Models\Transaction;
-use Carbon\Carbon;
+use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
 
 class TransactionController extends Controller
@@ -18,71 +18,58 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        $transactions = Transaction::select('transactions.id', 'date_start', 'date_end', 'name', DB::raw("DATEDIFF(date_end, date_start) as lama_pinjam"), 'status')
-        ->join('members', 'members.id', '=', 'transactions.member_id')
-        ->get();
+       //return keterlambatan()
+       $transactions = Transaction::with('members')->get();
 
-        foreach ($transactions as $key => $transaction) {
-            $transaction->details - DB::table('transaction_details')
-                                        ->select('price', 'transaction_details.qty', DB::raw("price'transaction_details.qty as total_bayar"))
-                                        ->where('transaction_id', $transaction->id)
-                                        ->join('watches', 'watches.id', '=', 'transaction_details.watch_id')
-                                        ->get();
-            $transaction->total_watch = $transaction->details->count();
-        }
-        // return $transactions;
+        return view('admin.transaction.index');
     }
     public function api(Request $request)
     {
+        $transactions = Transaction::select('transactions.*', DB::raw('DATEDIFF(date_end, date_start) as lama_pinjam'))->with('members', 'watches');
 
-        // // filter only one
-        // if ($request->status) {
-        //     $transactions = Transaction::with('books', 'members')->where('status', '=', $request->status - 1)->get();
-        // } else if ($request->date) {
-        //     $transactions = Transaction::with('books', 'members')->whereDate('date_start', '=', $request->date)->get();
-        // } else {
-        //     $transactions = Transaction::with('books', 'members')->get();
-        // }
-
-        // filter in the same time
-        if ($request->status && $request->date) {
-            $transactions = Transaction::with('watches', 'members')->where('status', '=', $request->status - 1)->whereDate('date_start', '=', $request->date)->get();
-        } else if ($request->status) {
-            $transactions = Transaction::with('watches', 'members')->where('status', '=', $request->status - 1)->get();
-        } else if ($request->date) {
-            $transactions = Transaction::with('watches', 'members')->whereDate('date_start', '=', $request->date)->get();
-        } else {
-            $transactions = Transaction::with('watches', 'members')->get();
-        }
-
-        $total = [];
-
-        foreach ($transactions as $keyTx => $transaction) {
-            $start = Carbon::parse($transaction->date_start);
-            $end = Carbon::parse($transaction->date_end);
-            $transaction->loanPeriod = $start->diffInDays($end);
-            $transaction->totalWatch = count($transaction->watches);
-            $transaction->dateStartFormat = dateFormatDays($transaction->date_start);
-            $transaction->dateEndFormat = dateFormatDays($transaction->date_end);
-
-            foreach ($transaction->watches as $keyWatch => $watch) {
-                $total[$keyWatch] = $watch->price * $watch->pivot->qty;
+        if ($request->status) {
+                $transaction = Transaction::with('watches', 'members')->where('status', '=', $request->status + 1)->get();
+            } else if ($request->dateSearch) {
+                $transaction = Transaction::with('watches', 'members')->whereDate('date_start', '=', $request->date)->get();
+            } else {
+                $transaction = Transaction::with('watches', 'members')->get();
             }
-            $transaction->totalPayment = array_sum($total);
-            $total = [];
 
-            $transaction->urlButton = '<a href="' . route('transactions.show', $transaction->id) . '" class="btn btn-info btn-sm">Details</a>
-            <form action="' . route('transactions.destroy', $transaction->id) . '" method="POST">
-            <input type="hidden" name="_method" value="DELETE">
-            <input type="submit" value="Delete" class="btn btn-danger btn-sm" onclick="return confirm(`Are you sure for delete this one?`)">
-            ' . csrf_field() . '
-            </form>';
+        $transactions = $transactions->get();
+
+        foreach ($transactions as $key => $value) {
+            $value->date_start = date('d M Y', strtotime($value->date_start));
+            $value->date_end = date('d M Y', strtotime($value->date_end));
+            $value->watch_total = count($value->watches);
+
+            $payment = 0;
+
+            foreach ($value->watches as $watch) {
+                $payment = $payment+$watch->price;
+            }
+
+            $value->total_bayar = 'Rp '.number_format($payment);
+
         }
 
         $datatables = datatables()->of($transactions)->addIndexColumn();
 
-        return $datatables->rawColumns(['urlButton'])->make(true);
+        return $datatables
+                ->addColumn('action', function($transaction){      
+                           $btn = '<a href="' . route('transactions.show', $transaction->id) . '" class="edit btn btn-info btn-sm" method="POST">View</a>';
+                           $btn = $btn.'<a href="' . route('transactions.edit', $transaction->id) . '" class="edit btn btn-primary btn-sm" method="POST">Edit</a>';
+                           $btn = $btn.'<form action="' . route('transactions.destroy', $transaction->id) . '" method="POST">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <input type="submit" value="Delete" class="btn btn-danger btn-sm" onclick="return confirm(`Are you sure for delete this one?`)">
+                            ' . csrf_field() . '
+                            </form>';
+         
+                            return $btn;
+                    })
+                ->rawColumns(['action'])
+                ->make(true);   
     }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -90,9 +77,9 @@ class TransactionController extends Controller
      */
     public function create()
     {
+        $watches = Watch::where('type', '!=', '0')->get();
         $members = Member::all();
-        $watches = Watch::where('qty', '!=', '0')->get();
-        return view('admin.transaction.create', compact('members', 'watches'));
+        return view('admin.transaction.create', compact('members','watches'));
     }
 
     /**
@@ -105,24 +92,33 @@ class TransactionController extends Controller
     {
         $this->validate($request, [
             'member_id' => ['required'],
-            'date_start' => ['required', 'before:date_end'],
+            'date_start' => ['required'],
             'date_end' => ['required'],
-            'watches' => ['required', 'array', 'min: 1'],
-            'status' => ['required', 'boolean']
-
+            'watches' => ['required'],
+            'status' => ['required']
         ]);
-
-        $data = $request->all();
-        $data['status'] = intval($data['status']);
-
-        $transaction = Transaction::create($data);
-        $transaction->watches()->attach($request->watches, ['qty' => 1]);
-
-        foreach ($request->watches as $watchArray) {
-            lessWatchQty($watchArray);
+        // ke transaction
+        $transactions = Transaction::create([
+            'member_id' => request('member_id'),
+            'date_start' => request('date_start'),
+            'date_end' => request('date_end'),
+            'status' => 2,
+        ]);
+        // ke transactionDetails
+        $watches = request('watches');
+        foreach ($watches as $watch => $value) {
+            TransactionDetail::create([
+                'transaction_id' => $transactions->id,
+                'watch_id' => $value,
+                'qty' => 1
+            ]);
+            // watch berkurang
+            $update = Watch::where('id', $value)->first();
+            $update->update([
+                'qty' => $update->qty - 1
+            ]);
         }
-
-        return redirect()->back()->with('success', 'Data has been saved');;
+        return redirect('transactions');
     }
 
     /**
@@ -133,8 +129,9 @@ class TransactionController extends Controller
      */
     public function show(Transaction $transaction)
     {
-        $transaction = Transaction::with('watches', 'members')->findOrFail($transaction->id);
-        return view('admin.transaction.show', compact('transaction'));
+        $transaction = Transaction::with('members','watches')->find($transaction->id);
+        $watches = Watch::all();
+        return view('admin.transaction.show', compact('transaction','watches'));
     }
 
     /**
@@ -145,20 +142,10 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction)
     {
-         // Redirect ketika status sudah dikembalikan
-         if ($transaction->status) {
-            return redirect('transactions/' . $transaction->id . '');
-        }
-
+        $transaction = Transaction::with('members','watches')->find($transaction->id);
         $members = Member::all();
-        $watches = Watch::where('qty', '!=', '0')->get();
-        $transaction = Transaction::with('watches', 'members')->findOrFail($transaction->id);
-
-        $watchId = [];
-        foreach ($transaction->watches as $key => $watch) {
-            $watchId[$key] = $watch->id;
-        }
-        return view('admin.transaction.edit', compact('transaction', 'members', 'watches', 'watchId'));
+        $watches = Watch::where('qty','!=','0')->get();
+        return view('admin.transaction.edit', compact('transaction','watches','members'));
     }
 
     /**
@@ -172,59 +159,42 @@ class TransactionController extends Controller
     {
         $this->validate($request, [
             'member_id' => ['required'],
-            'date_start' => ['required', 'before:date_end'],
+            'date_start' => ['required'],
             'date_end' => ['required'],
-            'watches' => ['required', 'array', 'min: 1'],
-            'status' => ['required', 'boolean']
-
+            'watches' => ['required'],
+            'status' => ['required','boolean']
         ]);
-        $arrayOfWatches = [];
+        //update ke transaction
+        $transaction->update([
+            'member_id' => request('member_id'),
+            'date_start' => request('date_start'),
+            'date_end' => request('date_end'),
+            'status' => request('status'),
+        ]);
 
-        $data = $request->all();
-        $data['status'] = intval($data['status']);
+        TransactionDetail::where('transaction_id',$transaction->id)->delete();
 
-        $transactions = Transaction::with('watches')->findOrFail($transaction->id);
-
-        // Get ID of Array in Books Transaction
-        foreach ($transactions->watches as $key => $watchArray) {
-            $arrayOfWatches[$key] = $watcheArray->id;
-        }
-
-
-        // When Request Status 0 / Belum dikembalikan
-        if (!$request->status) {
-            // Update Data to DB
-            $transaction->watches()->detach($arrayOfWatches);
-            $transaction->watches()->attach($request->watches, ['qty' => 1]);
-            $transaction->update($data);
-
-
-            // Update Transaksi buku yang akan diEdit
-            // Transaksi Buku Awal
-            foreach ($arrayOfWatches as $watchArray) {
-                addWatchQty($watchArray);
+        $watches = request('watches');
+        foreach ($watches as $watch => $value) {
+            TransactionDetail::create([
+                'transaction_id' => $transaction->id,
+                'watch_id' => $value,
+                'qty' => 1
+            ]);
+            //jika watch sdh kembali qty tambah 1
+            if(request('status') == 1) {
+                $update = Watch::where('id',$value)->first();
+                $update->update([
+                    'qty' => $update->qty + 1
+                ]);
+                //juka watch sdh kembali qty di transaksi detail jadi 0
+                $transaction_details = TransactionDetail::where('transaction_id',$transaction->id)->get();
+                foreach ($transaction_details as $td) {
+                    $td->update([
+                        'qty' => 0
+                    ]);
+                }
             }
-
-            // Transaksi Buku Setelah di Edit
-            foreach ($data['watches'] as $watchArray) {
-                lessWatchQty($watchArray);
-            }
-
-            return redirect()->back()->with('success', 'Data has been Updated');
-        }
-
-        // When Status 1 / Sudah dikembalikan
-
-        // When Update, but old data book not same with new update data will be error
-        if (!($arrayOfWatches == $request->watches)) {
-            return redirect()->back()->with('error', 'Data watch tidak boleh diubah kalau status sudah dikembalikan');
-        }
-
-        $transaction->update($data);
-
-        // Success update, Add Qty Books
-        foreach ($data['watches'] as $watchArray) {
-            addWatchQty($watchArray);
         }
 
         return redirect('transactions');
@@ -238,36 +208,10 @@ class TransactionController extends Controller
      */
     public function destroy(Transaction $transaction)
     {
-         // Only delete data  when status sudah dikembalikan
-         if ($transaction->status) {
+        TransactionDetail::where('transaction_id',$transaction->id)->delete();
 
-            // Delete Data Transaction
-            $transaction->delete();
-
-            return redirect()->back();
-        }
-
-        $arrayOfWatches = [];
-
-        $transactions = Transaction::with('watches')->findOrFail($transaction->id);
-
-        // Get ID Array of Books
-        foreach ($transactions->watches as $key => $watchArray) {
-            $arrayOfWatches[$key] = $watchArray->id;
-        }
-
-        // Delete Data in Table Transaction Details
-        $transaction->watches()->detach($arrayOfWatches);
-
-        // Delete Data Transaction
         $transaction->delete();
-
-        // Get update the quantity of book
-        foreach ($arrayOfWatches as $watchArray) {
-            addWatchQty($watchArray);
-        }
-
-        return redirect()->back();
-    
+        //return $transaction;
+        return redirect('transactions');
     }
 }

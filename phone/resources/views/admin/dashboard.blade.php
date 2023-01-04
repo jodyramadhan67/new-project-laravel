@@ -49,18 +49,20 @@
 
         <div class="col-lg-3 col-6">
 
-            <div class="small-box bg-danger">
-                <div class="inner">
-                    <h3></h3>
-                    <p>Total Transaction</p>
-                </div>
-                <div class="icon">
-                    <i class="ion ion-donut-graph"></i>
-                </div>
-            </div>
-        </div>
-
+<div class="small-box bg-danger">
+    <div class="inner">
+        <h3>{{ $total_transaction }}</h3>
+        <p>Total Transaction</p>
     </div>
+    <div class="icon">
+        <i class="ion ion-donut-graph"></i>
+    </div>
+    <a href="{{ route('transactions.index') }}" class="small-box-footer">More info <i
+            class="fas fa-arrow-circle-right"></i></a>
+</div>
+</div>
+
+</div>
 
     <div class="row">
 
