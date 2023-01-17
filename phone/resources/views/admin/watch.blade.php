@@ -73,7 +73,7 @@
                             <select name="phone_id" class="form-control">
                                 <option value="" disabled>-- Select phone --</option>
                                 @foreach ($phones as $phone)
-                                <option :selected="watch.phone_id == {{ $phone->id }}" value="{{ $phone->id }}">{{ $phone->imei }}</option>
+                                <option :selected="watch.phone_id == {{ $phone->id }}" value="{{ $phone->id }}">{{ $phone->type }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -82,7 +82,7 @@
                             <select name="tablet_id" class="form-control">
                                 <option value="" disabled>-- Select tablet --</option>
                                 @foreach ($tablets as $tablet)
-                                <option :selected="watch.tablet_id == {{ $tablet->id }}" value="{{ $tablet->id }}">{{ $tablet->imei }}</option>
+                                <option :selected="watch.tablet_id == {{ $tablet->id }}" value="{{ $tablet->id }}">{{ $tablet->type }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -91,7 +91,7 @@
                             <select name="laptop_id" class="form-control">
                                 <option value="" disabled>-- Select laptop --</option>
                                 @foreach ($laptops as $laptop)
-                                <option :selected="watch.laptop_id == {{ $laptop->id }}" value="{{ $laptop->id }}">{{ $laptop->imei }}</option>
+                                <option :selected="watch.laptop_id == {{ $laptop->id }}" value="{{ $laptop->id }}">{{ $laptop->type }}</option>
                                 @endforeach
                             </select>
                         </div>

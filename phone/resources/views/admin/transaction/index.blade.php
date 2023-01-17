@@ -38,7 +38,6 @@
                                 <th class="text-center">Date Start</th>
                                 <th class="text-center">Date End</th>
                                 <th class="text-center">Name</th>
-                                <th class="text-center">Stok</th>
                                 <th class="text-center">Watch Total</th>
                                 <th class="text-center">Price</th>
                                 <th class="text-center">Status</th>                                 
@@ -77,7 +76,6 @@
                 {data: 'date_start', class: 'text-center', orderable: true},
                 {data: 'date_end', class: 'text-center', orderable: true},
                 {data: 'members.name', class: 'text-center', orderable: true},
-                {data: 'stok', class: 'text-center', orderable: true},
                 {data: 'watch_total', class: 'text-center', orderable: true},
                 {data: 'total_bayar', class: 'text-center', orderable: true},
                 {render: function (index, row, data, meta) {
